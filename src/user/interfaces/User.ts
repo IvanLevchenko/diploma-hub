@@ -5,7 +5,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  roles: UserRoles[];
+  role: UserRoles;
 }
 
 export { User };
