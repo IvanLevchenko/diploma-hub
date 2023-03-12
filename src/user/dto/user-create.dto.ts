@@ -1,6 +1,4 @@
-import { IsString, IsEmail, MinLength, IsIn, MaxLength } from "class-validator";
-
-import UserRoles from "../../common/enums/user-roles.enum";
+import { IsString, IsEmail, MinLength, MaxLength } from "class-validator";
 
 export abstract class UserCreateDto {
   @IsString()
@@ -17,7 +15,4 @@ export abstract class UserCreateDto {
 
   @IsEmail()
   email: string;
-
-  @IsIn(Object.values(UserRoles))
-  role: UserRoles;
 }

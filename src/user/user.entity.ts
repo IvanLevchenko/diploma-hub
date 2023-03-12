@@ -7,14 +7,17 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column("text")
   firstName: string;
 
-  @Column()
+  @Column("text")
   lastName: string;
 
-  @Column({ unique: true })
+  @Column("text", { unique: true })
   email: string;
+
+  @Column({ nullable: false })
+  password: string;
 
   @Column("text")
   role: UserRoles;

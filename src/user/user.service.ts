@@ -5,6 +5,8 @@ import { Repository } from "typeorm";
 import { UserCreateDto } from "./dto/user-create.dto";
 import { UserGetDto } from "./dto/user-get.dto";
 import { User } from "./user.entity";
+import { UserGetByEmailDto } from "./dto/user-get-by-email.dto";
+import UserRoles from "../common/enums/user-roles.enum";
 
 import Exceptions from "./exceptions/user-create.exceptions";
 
@@ -16,18 +18,9 @@ export class UserService {
   ) {}
 
   async create(dtoIn: UserCreateDto): Promise<User> {
-    const isEmailAlreadyExists = await this.userRepository.findOneBy({
-      email: dtoIn.email,
-    });
-
-    if (isEmailAlreadyExists) {
-      throw new Exceptions.UserAlreadyExists({ email: dtoIn.email });
-    }
-
-    await this.userRepository.insert(dtoIn);
-
-    return await this.userRepository.findOneBy({
-      email: dtoIn.email,
+    return this.userRepository.save({
+      ...dtoIn,
+      role: UserRoles.STUDENT,
     });
   }
 
@@ -39,5 +32,9 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async getByEmail(dtoIn: UserGetByEmailDto): Promise<User | null> {
+    return await this.userRepository.findOneBy({ email: dtoIn.email });
   }
 }

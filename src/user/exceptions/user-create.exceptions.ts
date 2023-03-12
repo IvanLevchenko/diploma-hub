@@ -2,22 +2,9 @@ import { HttpException, HttpStatus } from "@nestjs/common";
 
 const useCase = "user/create";
 
-class UserAlreadyExists extends HttpException {
-  constructor(params) {
-    const message = "User with provided email is already exists";
-    const response = {
-      useCase,
-      message,
-      statusCode: HttpStatus.CONFLICT,
-      params,
-    };
-    super(response, HttpStatus.CONFLICT);
-  }
-}
-
 class UserDoesNotExist extends HttpException {
   constructor(params) {
-    const message = "User with provided id does not exist";
+    const message = "User does not exist";
     const response = {
       useCase,
       message,
@@ -29,6 +16,5 @@ class UserDoesNotExist extends HttpException {
 }
 
 export default {
-  UserAlreadyExists,
   UserDoesNotExist,
 };
