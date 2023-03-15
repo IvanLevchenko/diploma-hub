@@ -8,10 +8,10 @@ class UserDoesNotExist extends HttpException {
     const response = {
       useCase,
       message,
-      statusCode: HttpStatus.NOT_FOUND,
+      statusCode: HttpStatus.BAD_REQUEST,
       params,
     };
-    super(response, HttpStatus.NOT_FOUND);
+    super(response, HttpStatus.BAD_REQUEST);
   }
 }
 

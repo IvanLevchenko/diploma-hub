@@ -34,7 +34,7 @@ export class AuthService {
       throw new LoginExceptions.UserAuthorizationFailed();
     }
 
-    return await this.generateToken(user);
+    return this.generateToken(user);
   }
   async register(dtoIn: RegisterDto): Promise<AuthorizationResult> {
     const isEmailExists = await this.userService.getByEmail({
@@ -51,10 +51,10 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    return await this.generateToken(user);
+    return this.generateToken(user);
   }
 
-  private async generateToken(user: User): Promise<AuthorizationResult> {
+  private generateToken(user: User): AuthorizationResult {
     const payload = { id: user.id, email: user.email, role: user.role };
     return { token: this.jwtService.sign(payload) };
   }

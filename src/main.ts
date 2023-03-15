@@ -1,6 +1,7 @@
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
+
+import { AppModule } from "./app.module";
 
 import Constants from "./constants";
 
@@ -10,6 +11,6 @@ async function bootstrap() {
   app.setGlobalPrefix(Constants.apiPrefix);
   app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(process.env.APP_PORT);
+  await app.listen(process.env.APP_PORT || 3001);
 }
 bootstrap();
