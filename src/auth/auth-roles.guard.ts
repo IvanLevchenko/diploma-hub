@@ -34,8 +34,6 @@ export class AuthRolesGuard implements CanActivate {
       secret: process.env.SECRET_KEY,
     });
 
-    console.log(mustHaveRoles, parsedToken.role, parsedToken, "<-----");
-
     return mustHaveRoles.includes(parsedToken.role);
   }
 }
