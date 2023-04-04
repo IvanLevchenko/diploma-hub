@@ -24,6 +24,8 @@ export class UserController {
 
   @Get("get")
   @HttpCode(HttpStatus.OK)
+  @Roles(UserRoles.ADMIN)
+  @UseGuards(AuthRolesGuard)
   private get(@Query() dtoIn: UserGetDto): Promise<User | HttpException> {
     return this.userService.get(dtoIn);
   }

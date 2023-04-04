@@ -7,6 +7,9 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column("text", { default: "" })
+  refreshToken?: string;
+
   @Column("text")
   firstName: string;
 

@@ -8,6 +8,7 @@ import { User } from "./user.entity";
 import { UserGetByEmailDto } from "./dto/user-get-by-email.dto";
 import { UserCastToRoleDto } from "./dto/user-cast-to-role.dto";
 import UserRoles from "../common/enums/user-roles.enum";
+import { UserUpdateDto } from "./dto/user-update.dto";
 
 import Exceptions from "./exceptions/user-create.exceptions";
 
@@ -23,6 +24,21 @@ export class UserService {
       ...dtoIn,
       role: UserRoles.STUDENT,
     });
+  }
+
+  async update(dtoIn: UserUpdateDto) {
+    const user = await this.userRepository.findOneBy({ id: dtoIn.id });
+
+    if (!user) {
+      throw new Exceptions.UserDoesNotExist({ id: dtoIn.id });
+    }
+
+    await this.userRepository.update(user.id, dtoIn);
+
+    return {
+      ...user,
+      ...dtoIn,
+    };
   }
 
   async get(dtoIn: UserGetDto): Promise<User | HttpException> {
