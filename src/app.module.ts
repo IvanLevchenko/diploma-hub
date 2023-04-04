@@ -4,12 +4,14 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
+import { FileModule } from "./file/file.module";
+import { RepositoryModule } from "./repository/repository.module";
 
 import { User } from "./user/user.entity";
+import { Repository } from "./repository/repository.entity";
+import { File } from "./file/file.entity";
 
 @Module({
-  controllers: [],
-  providers: [],
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
@@ -19,11 +21,13 @@ import { User } from "./user/user.entity";
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE,
-      entities: [User],
+      entities: [User, File, Repository],
       synchronize: true,
     }),
     UserModule,
     AuthModule,
+    FileModule,
+    RepositoryModule,
   ],
 })
 export class AppModule {}
