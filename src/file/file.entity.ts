@@ -13,4 +13,7 @@ export class File {
 
   @Column("uuid")
   authorId: string;
+
+  @Column("uuid")
+  repositoryId: string;
 }
