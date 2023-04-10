@@ -3,15 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { User } from "../user/user.entity";
 import { AuthorizationResult } from "../common/types/authorization-result";
 import { UserService } from "../user/user.service";
-import UserRoles from "../common/enums/user-roles.enum";
-
-interface TokenPayload {
-  id: string;
-  email: string;
-  role: UserRoles;
-  firstName: string;
-  lastName: string;
-}
+import { TokenPayload } from "../common/interfaces/token-payload";
 
 class TokenHelper {
   constructor(
@@ -28,8 +20,12 @@ class TokenHelper {
       lastName: user.lastName,
     };
 
-    const token = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.SECRET_KEY,
+    });
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.SECRET_REFRESH_KEY,
+    });
 
     await this.userService.update({
       id: user.id,

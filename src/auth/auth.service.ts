@@ -3,13 +3,13 @@ import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 
 import { UserService } from "../user/user.service";
-import { RegisterDto } from "./dto/register.dto";
-import { LoginDto } from "./dto/login.dto";
 import { AuthorizationResult } from "../common/types/authorization-result";
+import TokenHelper from "../helpers/token-helper";
+import { LoginDto, RegisterDto, UpdateRefreshToken } from "./dto";
+import { User } from "../user/user.entity";
 
 import RegisterExceptions from "./exceptions/register.exceptions";
 import LoginExceptions from "./exceptions/login.exceptions";
-import TokenHelper from "../helpers/token-helper";
 
 @Injectable()
 export class AuthService {
@@ -38,6 +38,7 @@ export class AuthService {
 
     return this.tokenHelper.generateTokens(user);
   }
+
   async register(dtoIn: RegisterDto): Promise<AuthorizationResult> {
     const isEmailExists = await this.userService.getByEmail({
       email: dtoIn.email,
@@ -54,5 +55,20 @@ export class AuthService {
     });
 
     return this.tokenHelper.generateTokens(user);
+  }
+
+  async updateRefreshToken(
+    dtoIn: UpdateRefreshToken,
+  ): Promise<AuthorizationResult | void> {
+    const user = await this.userService.get({ id: dtoIn.id });
+
+    if (user instanceof User) {
+      const tokens = await this.tokenHelper.generateTokens(user);
+      await this.userService.update({
+        id: dtoIn.id,
+        refreshToken: tokens.refreshToken,
+      });
+      return tokens;
+    }
   }
 }

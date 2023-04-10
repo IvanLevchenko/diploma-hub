@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigModule } from "@nestjs/config";
 
@@ -7,13 +7,13 @@ import { AuthController } from "./auth.controller";
 import { UserModule } from "../user/user.module";
 import { AuthRolesGuard } from "./auth-roles.guard";
 
+@Global()
 @Module({
   providers: [AuthService, AuthRolesGuard],
   controllers: [AuthController],
   imports: [
     ConfigModule.forRoot(),
     JwtModule.register({
-      secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: "24h" },
     }),
     UserModule,

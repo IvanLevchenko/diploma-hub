@@ -1,4 +1,4 @@
 export type AuthorizationResult = {
   token: string;
-  refreshToken: string;
+  refreshToken?: string;
 };
