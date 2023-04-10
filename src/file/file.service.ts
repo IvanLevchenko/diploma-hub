@@ -24,7 +24,7 @@ export class FileService {
     return await this.fileRepository.save({
       filename: file.filename,
       filepath: file.path,
-      authorId: userSession.id,
+      author: userSession.id,
     });
   }
 }

@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+
+import { Repository } from "../repository/repository.entity";
 
 @Entity()
 export class File {
@@ -12,8 +20,10 @@ export class File {
   filepath: string;
 
   @Column("uuid")
-  authorId: string;
+  author: string;
 
   @Column("uuid")
-  repositoryId: string;
+  @OneToOne(() => Repository)
+  @JoinColumn()
+  repository: string;
 }
