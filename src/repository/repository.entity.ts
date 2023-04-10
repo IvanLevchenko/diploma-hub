@@ -1,4 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+
+import { User } from "../user/user.entity";
+import { Optional } from "../common/types/optional";
 
 @Entity()
 export class Repository {
@@ -14,7 +24,7 @@ export class Repository {
     default: () => "'[]'",
     nullable: false,
   })
-  repositoryFilesIdList: string[];
+  repositoryFilesList: string[];
 
   @Column("text")
   subject: string;
@@ -28,5 +38,10 @@ export class Repository {
   groups: string[];
 
   @Column("uuid")
-  authorId: string;
+  @OneToOne(() => User)
+  @JoinColumn()
+  author: string | Optional<User, "password" | "refreshToken">;
+
+  @CreateDateColumn()
+  created: Date;
 }
