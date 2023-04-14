@@ -6,6 +6,7 @@ import {
   Headers,
   HttpCode,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 
@@ -37,7 +38,7 @@ export class RepositoryController {
   }
 
   @Get("get")
-  private async get(@Body() dtoIn: RepositoryGetDto): Promise<Repository> {
+  private async get(@Query() dtoIn: RepositoryGetDto): Promise<Repository> {
     return this.repositoryService.get(dtoIn);
   }
 

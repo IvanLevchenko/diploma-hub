@@ -3,7 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 
@@ -38,7 +38,7 @@ export class Repository {
   groups: string[];
 
   @Column("uuid")
-  @OneToOne(() => User)
+  @ManyToOne(() => User, (user) => user)
   @JoinColumn()
   author: string | Optional<User, "password" | "refreshToken">;
 
