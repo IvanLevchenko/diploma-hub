@@ -6,5 +6,5 @@ export abstract class FileCreateDto {
   filename: string;
 
   @IsUUID()
-  repository: string;
+  repositoryId: string;
 }

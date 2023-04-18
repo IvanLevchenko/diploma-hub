@@ -7,13 +7,14 @@ import { FileController } from "./file.controller";
 import { FileService } from "./file.service";
 import { File } from "./file.entity";
 import { UserModule } from "../user/user.module";
+import { Repository } from "../repository/repository.entity";
 
 @Module({
   imports: [
     MulterModule.register({
       dest: "./uploads",
     }),
-    TypeOrmModule.forFeature([File]),
+    TypeOrmModule.forFeature([File, Repository]),
     UserModule,
     JwtModule,
   ],

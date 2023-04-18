@@ -2,10 +2,10 @@ import {
   Column,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-
+import { User } from "../user/user.entity";
 import { Repository } from "../repository/repository.entity";
 
 @Entity()
@@ -20,10 +20,16 @@ export class File {
   filepath: string;
 
   @Column("uuid")
-  author: string;
+  authorId: string;
 
   @Column("uuid")
-  @OneToOne(() => Repository)
+  repositoryId: string;
+
+  @ManyToOne(() => User, (user) => user)
   @JoinColumn()
-  repository: string;
+  author: User;
+
+  @ManyToOne(() => Repository, (repository) => repository)
+  @JoinColumn()
+  repository: Repository;
 }
