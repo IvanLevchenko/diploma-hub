@@ -8,7 +8,6 @@ import {
 } from "typeorm";
 
 import { User } from "../user/user.entity";
-import { Optional } from "../common/types/optional";
 
 @Entity()
 export class Repository {
@@ -18,29 +17,21 @@ export class Repository {
   @Column("text")
   name: string;
 
-  @Column({
-    type: "jsonb",
-    array: false,
-    default: () => "'[]'",
-    nullable: false,
-  })
-  repositoryFilesList: string[];
+  @Column("text", { array: true, default: () => "'{}'" })
+  repositoryFilesIdList: string[];
 
   @Column("text")
   subject: string;
 
-  @Column({
-    type: "jsonb",
-    array: false,
-    default: () => "'[]'",
-    nullable: false,
-  })
+  @Column("text", { array: true })
   groups: string[];
 
   @Column("uuid")
+  authorId: string;
+
   @ManyToOne(() => User, (user) => user)
   @JoinColumn()
-  author: string | Optional<User, "password" | "refreshToken">;
+  author: User;
 
   @CreateDateColumn()
   created: Date;

@@ -18,6 +18,7 @@ import {
   RepositoryGetDto,
   RepositoryListDto,
 } from "./dto";
+import { RepositoryWithAuthor } from "./types/repository-with-author";
 
 import { AuthRolesGuard } from "../auth/auth-roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
@@ -38,7 +39,9 @@ export class RepositoryController {
   }
 
   @Get("get")
-  private async get(@Query() dtoIn: RepositoryGetDto): Promise<Repository> {
+  private async get(
+    @Query() dtoIn: RepositoryGetDto,
+  ): Promise<RepositoryWithAuthor> {
     return this.repositoryService.get(dtoIn);
   }
 

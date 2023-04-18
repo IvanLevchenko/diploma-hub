@@ -11,10 +11,17 @@ import {
   RepositoryListDto,
 } from "./dto";
 
+import { User } from "../user/user.entity";
 import { UserService } from "../user/user.service";
 import TokenHelper from "../helpers/token-helper";
+import { RepositoryWithAuthor } from "./types/repository-with-author";
+import { Optional } from "../common/types/optional";
 
 import Exceptions from "./exceptions/get.exceptions";
+
+type RepositoryWithOptionalAuthData = Omit<Repository, "author"> & {
+  author: Optional<User, "refreshToken" | "password">;
+};
 
 @Injectable()
 export class RepositoryService {
@@ -32,24 +39,22 @@ export class RepositoryService {
     const decodedToken = this.tokenHelper.decodeToken(authorizationHeader);
     return await this.repositoryRepository.save({
       ...dtoIn,
-      author: decodedToken.id,
+      authorId: decodedToken.id,
     });
   }
 
-  async get(dtoIn: RepositoryGetDto): Promise<Repository> {
-    const repository = await this.repositoryRepository.findOne({
+  async get(dtoIn: RepositoryGetDto): Promise<RepositoryWithAuthor> {
+    const repository = (await this.repositoryRepository.findOne({
       where: { id: dtoIn.id },
       relations: ["author"],
-    });
+    })) as RepositoryWithOptionalAuthData;
 
     if (!repository) {
       throw new Exceptions.RepositoryDoesNotExist({ id: dtoIn.id });
     }
 
-    if (typeof repository.author !== "string") {
-      delete repository.author.password;
-      delete repository.author.refreshToken;
-    }
+    delete repository.author.refreshToken;
+    delete repository.author.password;
 
     return repository;
   }
