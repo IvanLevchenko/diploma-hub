@@ -2,13 +2,15 @@ import { HttpException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
-import { UserCreateDto } from "./dto/user-create.dto";
-import { UserGetDto } from "./dto/user-get.dto";
 import { User } from "./user.entity";
-import { UserGetByEmailDto } from "./dto/user-get-by-email.dto";
-import { UserCastToRoleDto } from "./dto/user-cast-to-role.dto";
 import UserRoles from "../common/enums/user-roles.enum";
-import { UserUpdateDto } from "./dto/user-update.dto";
+import {
+  UserCastToRoleDto,
+  UserCreateDto,
+  UserGetByEmailDto,
+  UserGetDto,
+  UserUpdateDto,
+} from "./dto";
 
 import Exceptions from "./exceptions/user-create.exceptions";
 
