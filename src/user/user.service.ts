@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
@@ -35,7 +35,7 @@ export class UserService {
       throw new Exceptions.UserDoesNotExist({ id: dtoIn.id });
     }
 
-    await this.userRepository.update(user.id, dtoIn);
+    await this.userRepository.update({ id: dtoIn.id }, dtoIn);
 
     return {
       ...user,
@@ -43,7 +43,7 @@ export class UserService {
     };
   }
 
-  async get(dtoIn: UserGetDto): Promise<User | HttpException> {
+  async get(dtoIn: UserGetDto): Promise<User> {
     const user = await this.userRepository.findOneBy({ id: dtoIn.id });
 
     if (!user) {
@@ -57,7 +57,7 @@ export class UserService {
     return await this.userRepository.findOneBy({ email: dtoIn.email });
   }
 
-  async castToRole(dtoIn: UserCastToRoleDto): Promise<User | HttpException> {
+  async castToRole(dtoIn: UserCastToRoleDto): Promise<User> {
     const user = await this.userRepository.findOneBy({ id: dtoIn.id });
 
     if (!user) {
