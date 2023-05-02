@@ -46,7 +46,7 @@ export class RepositoryService {
   async get(dtoIn: RepositoryGetDto): Promise<RepositoryWithAuthor> {
     const repository = (await this.repositoryRepository.findOne({
       where: { id: dtoIn.id },
-      relations: ["author"],
+      relations: ["author", "filesList"],
     })) as RepositoryWithOptionalAuthData;
 
     if (!repository) {

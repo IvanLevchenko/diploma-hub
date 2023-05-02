@@ -4,10 +4,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 
 import { User } from "../user/user.entity";
+import { File } from "../file/file.entity";
 
 @Entity()
 export class Repository {
@@ -18,7 +20,7 @@ export class Repository {
   name: string;
 
   @Column("text", { array: true, default: () => "'{}'" })
-  repositoryFilesIdList: string[];
+  filesIdList: string[];
 
   @Column("text")
   subject: string;
@@ -29,10 +31,14 @@ export class Repository {
   @Column("uuid")
   authorId: string;
 
-  @ManyToOne(() => User, (user) => user)
+  @CreateDateColumn()
+  created: Date;
+
+  @ManyToOne(() => User, (user) => user, { onDelete: "CASCADE" })
   @JoinColumn()
   author: User;
 
-  @CreateDateColumn()
-  created: Date;
+  @OneToMany(() => File, (file) => file.repository)
+  @JoinColumn()
+  filesList: File[];
 }

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, StreamableFile } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository as TypeOrmRepository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
@@ -9,9 +9,10 @@ import { Repository } from "../repository/repository.entity";
 import { UserService } from "../user/user.service";
 import { File } from "./file.entity";
 import TokenHelper from "../helpers/token-helper";
-import { FileCreateDto, FileListDto } from "./dto";
+import { FileCreateDto, FileGetDto, FileListDto } from "./dto";
 
-import Exceptions from "./exceptions/create.exceptions";
+import CreateExceptions from "./exceptions/create.exceptions";
+import GetExceptions from "./exceptions/get.exceptions";
 
 @Injectable()
 export class FileService {
@@ -40,11 +41,13 @@ export class FileService {
     if (!repository) {
       this.deleteFileFromUploads(file.filename);
 
-      throw new Exceptions.RepositoryDoesNotExist({ id: dtoIn.repositoryId });
+      throw new CreateExceptions.RepositoryDoesNotExist({
+        id: dtoIn.repositoryId,
+      });
     }
 
     const fileEntity = new File();
-    fileEntity.filename = file.filename;
+    fileEntity.filename = dtoIn.filename;
     fileEntity.filepath = file.path;
     fileEntity.repositoryId = dtoIn.repositoryId;
     fileEntity.authorId = userSession.id;
@@ -55,7 +58,7 @@ export class FileService {
     } catch (e) {
       this.deleteFileFromUploads(file.filename);
 
-      throw new Exceptions.FileCreationFailed({});
+      throw new CreateExceptions.FileCreationFailed({});
     }
 
     try {
@@ -63,7 +66,7 @@ export class FileService {
     } catch (e) {
       await this.fileRepository.delete({ id: createdFile.id });
 
-      throw new Exceptions.FileCreationFailed({});
+      throw new CreateExceptions.FileCreationFailed({});
     }
 
     return createdFile;
@@ -79,6 +82,22 @@ export class FileService {
     });
   }
 
+  async get(dtoIn: FileGetDto): Promise<StreamableFile> {
+    const file = await this.fileRepository.findOne({
+      where: { id: dtoIn.id },
+    });
+
+    if (!file) {
+      throw new GetExceptions.FileDoesNotExist({ id: dtoIn.id });
+    }
+
+    const readableStream = fs.createReadStream(
+      path.join(process.cwd(), file.filepath),
+    );
+
+    return new StreamableFile(readableStream);
+  }
+
   private async addFileToRepository(
     fileId: string,
     repositoryId: string,
@@ -87,8 +106,7 @@ export class FileService {
       .createQueryBuilder()
       .update(Repository)
       .set({
-        repositoryFilesIdList: () =>
-          `array_append("repositoryFilesIdList", '${fileId}')`,
+        filesIdList: () => `array_append("filesIdList", '${fileId}')`,
       })
       .where("id = :id", { id: repositoryId })
       .execute();
@@ -98,12 +116,12 @@ export class FileService {
     const uploadsFolder = path.resolve(__dirname, "..", "..", "uploads");
     fs.readdir(uploadsFolder, (e) => {
       if (e) {
-        throw new Exceptions.FileRollbackFailed({});
+        throw new CreateExceptions.FileRollbackFailed({});
       }
       const filepath = path.resolve(uploadsFolder, filename);
       fs.unlink(filepath, (e) => {
         if (e) {
-          throw new Exceptions.FileRollbackFailed({});
+          throw new CreateExceptions.FileRollbackFailed({});
         }
       });
     });

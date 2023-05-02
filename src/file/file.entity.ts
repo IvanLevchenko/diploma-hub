@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
+
 import { User } from "../user/user.entity";
 import { Repository } from "../repository/repository.entity";
 
@@ -25,11 +26,13 @@ export class File {
   @Column("uuid")
   repositoryId: string;
 
-  @ManyToOne(() => User, (user) => user)
+  @ManyToOne(() => User, (user) => user, { onDelete: "CASCADE" })
   @JoinColumn()
   author: User;
 
-  @ManyToOne(() => Repository, (repository) => repository)
+  @ManyToOne(() => Repository, (repository) => repository, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn()
   repository: Repository;
 }

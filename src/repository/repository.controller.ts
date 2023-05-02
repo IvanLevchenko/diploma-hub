@@ -39,6 +39,8 @@ export class RepositoryController {
   }
 
   @Get("get")
+  @Roles(UserRoles.ALL)
+  @UseGuards(AuthRolesGuard)
   private async get(
     @Query() dtoIn: RepositoryGetDto,
   ): Promise<RepositoryWithAuthor> {
@@ -46,7 +48,7 @@ export class RepositoryController {
   }
 
   @Get("list")
-  @Roles(UserRoles.STUDENT, UserRoles.TEACHER, UserRoles.ADMIN)
+  @Roles(UserRoles.ALL)
   @UseGuards(AuthRolesGuard)
   private async list(@Body() dtoIn: RepositoryListDto): Promise<Repository[]> {
     return this.repositoryService.list(dtoIn);

@@ -6,13 +6,17 @@ import {
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
+  Query,
+  Res,
+  StreamableFile,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import type { Response } from "express";
 
-import { FileCreateDto, FileListDto } from "./dto";
+import { FileCreateDto, FileGetDto, FileListDto } from "./dto";
 import { FileService } from "./file.service";
 import { File } from "./file.entity";
 
@@ -30,7 +34,7 @@ export class FileController {
 
   @Post("create")
   @UseGuards(AuthRolesGuard)
-  @Roles(UserRoles.ADMIN, UserRoles.TEACHER)
+  @Roles(UserRoles.ALL)
   @UseInterceptors(FileInterceptor("data"))
   private async create(
     @UploadedFile(FileController.fileValidators) file: Express.Multer.File,
@@ -42,8 +46,21 @@ export class FileController {
 
   @Get("list")
   @UseGuards(AuthRolesGuard)
-  @Roles(UserRoles.ADMIN, UserRoles.TEACHER, UserRoles.STUDENT)
-  private async list(dtoIn: FileListDto): Promise<File[]> {
+  @Roles(UserRoles.ALL)
+  private async list(@Query() dtoIn: FileListDto): Promise<File[]> {
     return this.fileService.list(dtoIn);
+  }
+
+  @Get("get")
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserRoles.ALL)
+  private async get(
+    @Query() dtoIn: FileGetDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    res.set({
+      "Content-Type": "application/pdf",
+    });
+    return this.fileService.get(dtoIn);
   }
 }
