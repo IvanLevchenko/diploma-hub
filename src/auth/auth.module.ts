@@ -11,13 +11,7 @@ import { AuthRolesGuard } from "./auth-roles.guard";
 @Module({
   providers: [AuthService, AuthRolesGuard],
   controllers: [AuthController],
-  imports: [
-    ConfigModule.forRoot(),
-    JwtModule.register({
-      signOptions: { expiresIn: "24h" },
-    }),
-    UserModule,
-  ],
+  imports: [ConfigModule.forRoot(), JwtModule, UserModule],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

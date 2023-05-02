@@ -1,5 +1,5 @@
-import { LoginDto } from "./login.dto";
-import { RegisterDto } from "./register.dto";
-import { UpdateRefreshToken } from "./update-refresh-token";
-
-export { LoginDto, RegisterDto, UpdateRefreshToken };
+export { LoginDto } from "./login.dto";
+export { RegisterDto } from "./register.dto";
+export { UpdateRefreshTokenDto } from "./update-refresh-token";
+export { LogoutDto, LogoutServiceDto } from "./logout.dto";
+export { IsAuthorizedDto } from "./is-authorized-dto";

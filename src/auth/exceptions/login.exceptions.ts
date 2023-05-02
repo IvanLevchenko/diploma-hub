@@ -16,11 +16,12 @@ class UserDoesNotExist extends HttpException {
 }
 
 class UserAuthorizationFailed extends HttpException {
-  constructor() {
+  constructor(params) {
     const message = "Credentials are incorrect.";
     const response = {
       useCase,
       message,
+      params,
       statusCode: HttpStatus.UNAUTHORIZED,
     };
     super(response, HttpStatus.UNAUTHORIZED);

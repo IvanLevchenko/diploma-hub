@@ -5,8 +5,13 @@ import * as bcrypt from "bcryptjs";
 import { UserService } from "../user/user.service";
 import { AuthorizationResult } from "../common/types/authorization-result";
 import TokenHelper from "../helpers/token-helper";
-import { LoginDto, RegisterDto, UpdateRefreshToken } from "./dto";
-import { User } from "../user/user.entity";
+import {
+  IsAuthorizedDto,
+  LoginDto,
+  LogoutServiceDto,
+  RegisterDto,
+  UpdateRefreshTokenDto,
+} from "./dto";
 
 import RegisterExceptions from "./exceptions/register.exceptions";
 import LoginExceptions from "./exceptions/login.exceptions";
@@ -20,7 +25,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(dtoIn: LoginDto): Promise<AuthorizationResult> {
+  public async login(dtoIn: LoginDto): Promise<AuthorizationResult> {
     const user = await this.userService.getByEmail({ email: dtoIn.email });
 
     if (!user) {
@@ -33,13 +38,13 @@ export class AuthService {
     );
 
     if (!isCorrectPassword) {
-      throw new LoginExceptions.UserAuthorizationFailed();
+      throw new LoginExceptions.UserAuthorizationFailed({});
     }
 
     return this.tokenHelper.generateTokens(user);
   }
 
-  async register(dtoIn: RegisterDto): Promise<AuthorizationResult> {
+  public async register(dtoIn: RegisterDto): Promise<AuthorizationResult> {
     const isEmailExists = await this.userService.getByEmail({
       email: dtoIn.email,
     });
@@ -57,18 +62,46 @@ export class AuthService {
     return this.tokenHelper.generateTokens(user);
   }
 
-  async updateRefreshToken(
-    dtoIn: UpdateRefreshToken,
-  ): Promise<AuthorizationResult | void> {
+  public async logout(dtoIn: LogoutServiceDto): Promise<void> {
+    const parsedToken = this.tokenHelper.decodeToken(
+      `${dtoIn.authorizationHeader}`,
+    );
+
+    await this.userService.update({
+      id: parsedToken.id,
+      refreshToken: "",
+    });
+  }
+
+  public async isAuthorized(
+    dtoIn: IsAuthorizedDto,
+  ): Promise<{ isAuthorized: boolean }> {
+    const isAuthorized = this.tokenHelper.isTokenValid(
+      dtoIn.authorizationHeader,
+    );
+
+    return {
+      isAuthorized,
+    };
+  }
+
+  public async updateRefreshToken(
+    dtoIn: UpdateRefreshTokenDto,
+  ): Promise<AuthorizationResult> {
     const user = await this.userService.get({ id: dtoIn.id });
 
-    if (user instanceof User) {
-      const tokens = await this.tokenHelper.generateTokens(user);
-      await this.userService.update({
-        id: dtoIn.id,
-        refreshToken: tokens.refreshToken,
+    if (dtoIn.refreshToken !== user.refreshToken) {
+      throw new LoginExceptions.UserAuthorizationFailed({
+        refreshToken: dtoIn.refreshToken,
       });
-      return tokens;
     }
+
+    const tokens = await this.tokenHelper.generateTokens(user);
+    await this.userService.update({
+      id: dtoIn.id,
+      refreshToken: tokens.refreshToken,
+    });
+
+    return tokens;
   }
 }

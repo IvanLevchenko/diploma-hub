@@ -1,6 +1,9 @@
-import { IsUUID } from "class-validator";
+import { IsString, IsUUID } from "class-validator";
 
-export abstract class UpdateRefreshToken {
+export abstract class UpdateRefreshTokenDto {
   @IsUUID()
   id: string;
+
+  @IsString()
+  refreshToken: string;
 }
