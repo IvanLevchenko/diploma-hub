@@ -24,7 +24,7 @@ class TokenHelper {
 
     const token = this.jwtService.sign(payload, {
       secret: process.env.SECRET_KEY,
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
     const refreshToken = this.jwtService.sign(
       { id: user.id },

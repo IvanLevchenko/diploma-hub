@@ -15,6 +15,7 @@ import { AuthorizationResult } from "../common/types/authorization-result";
 import { AuthRolesGuard } from "./auth-roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
 import UserRoles from "../common/enums/user-roles.enum";
+import { IsAuthorizedResponse } from "./interfaces/is-authorized-response";
 
 import Constants from "../constants";
 
@@ -47,10 +48,24 @@ export class AuthController {
   }
 
   @Get("isAuthorized")
-  private async isAuthorized(@Req() request: Request) {
-    return this.authService.isAuthorized({
+  private async isAuthorized(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<IsAuthorizedResponse> {
+    const isAuthorizedResult = await this.authService.isAuthorized({
       authorizationHeader: `${request.headers.authorization}`,
+      refreshToken: request.cookies.refreshToken,
     });
+    const isAuthorizedResponse: IsAuthorizedResponse = {
+      isAuthorized: isAuthorizedResult.isAuthorized,
+    };
+
+    if (isAuthorizedResult.tokens) {
+      this.setRefreshTokenAndReturn(isAuthorizedResult.tokens, response);
+      isAuthorizedResponse.token = isAuthorizedResult.tokens.token;
+    }
+
+    return isAuthorizedResponse;
   }
 
   @Post("register")

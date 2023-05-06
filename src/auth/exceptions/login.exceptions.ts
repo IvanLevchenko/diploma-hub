@@ -4,7 +4,7 @@ const useCase = "auth/login";
 
 class UserDoesNotExist extends HttpException {
   constructor(params) {
-    const message = "User with provided email does not exists.";
+    const message = "User with provided email does not exist.";
     const response = {
       useCase,
       message,

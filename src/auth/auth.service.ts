@@ -12,6 +12,7 @@ import {
   RegisterDto,
   UpdateRefreshTokenDto,
 } from "./dto";
+import { IsAuthorized } from "./interfaces/is-authorized";
 
 import RegisterExceptions from "./exceptions/register.exceptions";
 import LoginExceptions from "./exceptions/login.exceptions";
@@ -73,16 +74,34 @@ export class AuthService {
     });
   }
 
-  public async isAuthorized(
-    dtoIn: IsAuthorizedDto,
-  ): Promise<{ isAuthorized: boolean }> {
+  public async isAuthorized(dtoIn: IsAuthorizedDto): Promise<IsAuthorized> {
+    let response: IsAuthorized;
+
     const isAuthorized = this.tokenHelper.isTokenValid(
       dtoIn.authorizationHeader,
     );
+    const isRefreshToken = this.tokenHelper.isTokenValid(dtoIn.refreshToken);
 
-    return {
-      isAuthorized,
-    };
+    if (!isAuthorized && !isRefreshToken) {
+      response = {
+        isAuthorized: false,
+      };
+    } else {
+      const tokenPayload = this.tokenHelper.decodeToken(
+        dtoIn.authorizationHeader,
+      );
+      const tokens = await this.updateRefreshToken({
+        id: tokenPayload.id,
+        refreshToken: dtoIn.refreshToken,
+      });
+
+      response = {
+        isAuthorized: true,
+        tokens,
+      };
+    }
+
+    return response;
   }
 
   public async updateRefreshToken(
