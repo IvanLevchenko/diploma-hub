@@ -50,7 +50,9 @@ export class RepositoryController {
   @Get("list")
   @Roles(UserRoles.ALL)
   @UseGuards(AuthRolesGuard)
-  private async list(@Body() dtoIn: RepositoryListDto): Promise<Repository[]> {
+  private async list(
+    @Body() dtoIn: RepositoryListDto,
+  ): Promise<RepositoryWithAuthor[]> {
     return this.repositoryService.list(dtoIn);
   }
 

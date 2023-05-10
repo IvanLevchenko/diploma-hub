@@ -59,15 +59,22 @@ export class RepositoryService {
     return repository;
   }
 
-  async list(dtoIn: RepositoryListDto): Promise<Repository[]> {
+  async list(dtoIn: RepositoryListDto): Promise<RepositoryWithAuthor[]> {
     const filter = {
       skip: dtoIn.pageInfo?.page,
       take: dtoIn.pageInfo?.pageSize,
     };
 
-    return await this.repositoryRepository.find({
+    const repositories = (await this.repositoryRepository.find({
       take: filter.take,
       skip: filter.skip,
+      relations: ["author"],
+    })) as RepositoryWithOptionalAuthData[];
+
+    return repositories.map((repository) => {
+      delete repository.author.refreshToken;
+      delete repository.author.password;
+      return repository;
     });
   }
 
