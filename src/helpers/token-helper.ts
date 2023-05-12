@@ -58,10 +58,14 @@ class TokenHelper {
     return this.jwtService.decode(token) as TokenPayload;
   }
 
-  public isTokenValid(token: string): boolean {
+  public isTokenValid(token: string, isRefreshToken: boolean): boolean {
     token = this.removeBearer(token);
     try {
-      this.jwtService.verify(token, { secret: process.env.SECRET_KEY });
+      this.jwtService.verify(token, {
+        secret: isRefreshToken
+          ? process.env.SECRET_REFRESH_KEY
+          : process.env.SECRET_KEY,
+      });
     } catch (e) {
       return false;
     }
