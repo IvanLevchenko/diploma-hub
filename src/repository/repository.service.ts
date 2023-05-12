@@ -1,7 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository as TypeOrmRepository } from "typeorm";
+import {
+  Between,
+  FindOptionsWhere,
+  In,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual,
+  Repository as TypeOrmRepository,
+} from "typeorm";
 
 import { Repository } from "./repository.entity";
 import {
@@ -60,14 +68,12 @@ export class RepositoryService {
   }
 
   async list(dtoIn: RepositoryListDto): Promise<RepositoryWithAuthor[]> {
-    const filter = {
-      skip: dtoIn.pageInfo?.page,
-      take: dtoIn.pageInfo?.pageSize,
-    };
+    const filter = this.getFilterList(dtoIn);
 
     const repositories = (await this.repositoryRepository.find({
-      take: filter.take,
-      skip: filter.skip,
+      skip: dtoIn.pageInfo?.page,
+      take: dtoIn.pageInfo?.pageSize,
+      where: filter,
       relations: ["author"],
     })) as RepositoryWithOptionalAuthData[];
 
@@ -80,5 +86,26 @@ export class RepositoryService {
 
   async delete(dtoIn: RepositoryDeleteDto): Promise<void> {
     await this.repositoryRepository.delete({ id: dtoIn.id });
+  }
+
+  private getFilterList(dtoIn): FindOptionsWhere<Repository> {
+    const filter: FindOptionsWhere<Repository> = {};
+    if (dtoIn.dateFrom && dtoIn.dateTo) {
+      filter.created = Between(dtoIn.dateFrom, dtoIn.dateFrom);
+    } else if (dtoIn.dateFrom) {
+      filter.created = MoreThanOrEqual(dtoIn.dateFrom);
+    } else if (dtoIn.dateTo) {
+      filter.created = LessThanOrEqual(dtoIn.dateTo);
+    }
+
+    if (dtoIn.subjects?.length) {
+      filter.subject = In(dtoIn.subjects);
+    }
+
+    if (dtoIn.name) {
+      filter.name = Like(`%${dtoIn.name}%`);
+    }
+
+    return filter;
   }
 }

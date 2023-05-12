@@ -3,4 +3,8 @@ export abstract class RepositoryListDto {
     page: number;
     pageSize: number;
   };
+  subjects?: string[];
+  dateFrom?: Date;
+  dateTo?: Date;
+  name?: string;
 }
