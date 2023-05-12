@@ -26,7 +26,7 @@ export class File {
   @Column("uuid")
   repositoryId: string;
 
-  @ManyToOne(() => User, (user) => user, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (user) => user, { onDelete: "CASCADE", eager: true })
   @JoinColumn()
   author: User;
 

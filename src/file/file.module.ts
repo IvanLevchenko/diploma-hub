@@ -12,7 +12,7 @@ import { Repository } from "../repository/repository.entity";
 @Module({
   imports: [
     MulterModule.register({
-      dest: "./uploads",
+      dest: "./uploads/pdf",
     }),
     TypeOrmModule.forFeature([File, Repository]),
     UserModule,

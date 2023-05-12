@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
 
-const useCase = "file/get";
+const useCase = "file/delete";
 
 class FileDoesNotExist extends HttpException {
   constructor(params) {
@@ -15,9 +15,9 @@ class FileDoesNotExist extends HttpException {
   }
 }
 
-class TemporaryFileNotDeleted extends HttpException {
+class FileDeleteFailed extends HttpException {
   constructor(params) {
-    const message = "Temporary 'png' file has not been deleted.";
+    const message = "File delete failed.";
     const response = {
       useCase,
       message,
@@ -30,5 +30,5 @@ class TemporaryFileNotDeleted extends HttpException {
 
 export default {
   FileDoesNotExist,
-  TemporaryFileNotDeleted,
+  FileDeleteFailed,
 };

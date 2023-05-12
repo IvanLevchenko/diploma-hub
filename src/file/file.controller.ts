@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Delete,
+  FileTypeValidator,
   Get,
   Headers,
   MaxFileSizeValidator,
@@ -16,7 +18,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 
-import { FileCreateDto, FileGetDto, FileListDto } from "./dto";
+import { FileCreateDto, FileDeleteDto, FileGetDto, FileListDto } from "./dto";
 import { FileService } from "./file.service";
 import { File } from "./file.entity";
 
@@ -29,7 +31,10 @@ export class FileController {
   constructor(private fileService: FileService) {}
 
   private static fileValidators: ParseFilePipe = new ParseFilePipe({
-    validators: [new MaxFileSizeValidator({ maxSize: 1000 * 1000 })],
+    validators: [
+      new MaxFileSizeValidator({ maxSize: 1000 * 1000 }),
+      new FileTypeValidator({ fileType: "pdf" }),
+    ],
   });
 
   @Post("create")
@@ -58,9 +63,19 @@ export class FileController {
     @Query() dtoIn: FileGetDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
+    const stream = await this.fileService.get(dtoIn);
+
     res.set({
-      "Content-Type": "application/pdf",
+      "Content-Type": dtoIn.isPreview ? "image/png" : "application/pdf",
     });
-    return this.fileService.get(dtoIn);
+
+    return stream;
+  }
+
+  @Delete("delete")
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserRoles.ALL)
+  private async delete(@Body() dtoIn: FileDeleteDto): Promise<void> {
+    return this.fileService.delete(dtoIn);
   }
 }

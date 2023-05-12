@@ -4,15 +4,18 @@ import { Repository as TypeOrmRepository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 import * as path from "path";
 import * as fs from "fs";
+import * as process from "process";
 
 import { Repository } from "../repository/repository.entity";
 import { UserService } from "../user/user.service";
 import { File } from "./file.entity";
 import TokenHelper from "../helpers/token-helper";
-import { FileCreateDto, FileGetDto, FileListDto } from "./dto";
+import RunScriptHelper from "../helpers/run-script-helper";
+import { FileCreateDto, FileDeleteDto, FileGetDto, FileListDto } from "./dto";
 
 import CreateExceptions from "./exceptions/create.exceptions";
 import GetExceptions from "./exceptions/get.exceptions";
+import DeleteExceptions from "./exceptions/delete.exceptions";
 
 @Injectable()
 export class FileService {
@@ -27,7 +30,7 @@ export class FileService {
 
   private tokenHelper = new TokenHelper(this.jwtService, this.userService);
 
-  async create(
+  public async create(
     dtoIn: FileCreateDto,
     file: Express.Multer.File,
     token: string,
@@ -69,10 +72,16 @@ export class FileService {
       throw new CreateExceptions.FileCreationFailed({});
     }
 
+    const runScriptHelper = new RunScriptHelper();
+    const separatedPath = fileEntity.filepath.split(path.sep);
+    const storedFileName = separatedPath[separatedPath.length - 1];
+
+    runScriptHelper.pdfPreviewPageToBase64(storedFileName, createdFile.id);
+
     return createdFile;
   }
 
-  async list(dtoIn: FileListDto = {}): Promise<File[]> {
+  public async list(dtoIn: FileListDto = {}): Promise<File[]> {
     return await this.fileRepository.find({
       where: {
         repositoryId: dtoIn.repositoryId,
@@ -82,7 +91,7 @@ export class FileService {
     });
   }
 
-  async get(dtoIn: FileGetDto): Promise<StreamableFile> {
+  public async get(dtoIn: FileGetDto): Promise<StreamableFile> {
     const file = await this.fileRepository.findOne({
       where: { id: dtoIn.id },
     });
@@ -91,11 +100,54 @@ export class FileService {
       throw new GetExceptions.FileDoesNotExist({ id: dtoIn.id });
     }
 
+    if (dtoIn.isPreview === "true") {
+      const tmpFilePath = `uploads/tmp/tmp-${file.id}.png`;
+      const previewPageFilePath = path.join(
+        `uploads/first-pages/page-${file.id}`,
+      );
+      const pathToPage = path.join(process.cwd(), previewPageFilePath);
+      const buffer = fs.readFileSync(pathToPage);
+
+      fs.writeFileSync(tmpFilePath, buffer.toString(), {
+        encoding: "base64",
+      });
+
+      const readableStream = fs.createReadStream(tmpFilePath);
+
+      process.nextTick(() => {
+        fs.unlink(tmpFilePath, (e) => {
+          if (e) {
+            throw new GetExceptions.TemporaryFileNotDeleted({});
+          }
+        });
+      });
+
+      return new StreamableFile(readableStream, {
+        type: "image/png",
+      });
+    }
+
     const readableStream = fs.createReadStream(
       path.join(process.cwd(), file.filepath),
     );
 
     return new StreamableFile(readableStream);
+  }
+
+  public async delete(dtoIn: FileDeleteDto): Promise<void> {
+    const file = await this.fileRepository.findOneBy({ id: dtoIn.id });
+
+    if (!file) {
+      throw new DeleteExceptions.FileDoesNotExist({ id: dtoIn.id });
+    }
+
+    fs.unlink(path.join(process.cwd(), file.filepath), (e) => {
+      if (e) {
+        throw new DeleteExceptions.FileDeleteFailed({});
+      }
+    });
+
+    await this.fileRepository.delete({ id: dtoIn.id });
   }
 
   private async addFileToRepository(

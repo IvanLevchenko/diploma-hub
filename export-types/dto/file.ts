@@ -1,1 +1,1 @@
-export { FileGetDto } from "../../src/file/dto/index";
+export { FileGetDto, FileCreateDto } from "../../src/file/dto/index";
