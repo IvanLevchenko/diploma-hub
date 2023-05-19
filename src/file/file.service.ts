@@ -73,10 +73,39 @@ export class FileService {
     }
 
     const runScriptHelper = new RunScriptHelper();
-    const separatedPath = fileEntity.filepath.split(path.sep);
-    const storedFileName = separatedPath[separatedPath.length - 1];
+    const filepath = path.join(process.cwd(), createdFile.filepath);
 
-    runScriptHelper.pdfPreviewPageToBase64(storedFileName, createdFile.id);
+    const allFiles = await this.list();
+    const filesPaths = allFiles.map((file) =>
+      path.join(process.cwd(), file.filepath),
+    );
+
+    const plagiarismResult = await runScriptHelper.plagiarismCheck(
+      filepath,
+      filesPaths,
+    );
+
+    if (!plagiarismResult.passed) {
+      this.deleteFileUploads(createdFile);
+
+      await this.fileRepository.delete({ id: createdFile.id });
+
+      throw new CreateExceptions.FileContainsPlagiarism({
+        unique: plagiarismResult.percentOfUniqueness,
+      });
+    }
+
+    try {
+      runScriptHelper.pdfPreviewPageToBase64(filepath, createdFile.id);
+    } catch (e) {
+      this.deleteFileUploads(createdFile);
+
+      await this.fileRepository.delete({ id: createdFile.id });
+
+      throw new CreateExceptions.FileContainsPlagiarism({
+        unique: plagiarismResult.percentOfUniqueness,
+      });
+    }
 
     return createdFile;
   }
@@ -141,11 +170,7 @@ export class FileService {
       throw new DeleteExceptions.FileDoesNotExist({ id: dtoIn.id });
     }
 
-    fs.unlink(path.join(process.cwd(), file.filepath), (e) => {
-      if (e) {
-        throw new DeleteExceptions.FileDeleteFailed({});
-      }
-    });
+    this.deleteFileUploads(file);
 
     await this.fileRepository.delete({ id: dtoIn.id });
   }
@@ -177,5 +202,27 @@ export class FileService {
         }
       });
     });
+  }
+
+  private deleteFileUploads(createdFile: File): void {
+    fs.unlink(path.join(process.cwd(), createdFile.filepath), (err) => {
+      if (err) {
+        console.log(err);
+      }
+    });
+
+    fs.unlink(
+      path.join(
+        process.cwd(),
+        "uploads",
+        "first-pages",
+        `page-${createdFile.id}`,
+      ),
+      (err) => {
+        if (err) {
+          console.log(err);
+        }
+      },
+    );
   }
 }

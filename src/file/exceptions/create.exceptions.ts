@@ -42,8 +42,22 @@ class RepositoryDoesNotExist extends HttpException {
   }
 }
 
+class FileContainsPlagiarism extends HttpException {
+  constructor(params) {
+    const message = "File contains plagiarism so it was not uploaded.";
+    const response = {
+      useCase,
+      message,
+      statusCode: HttpStatus.BAD_REQUEST,
+      params,
+    };
+    super(response, HttpStatus.BAD_REQUEST);
+  }
+}
+
 export default {
   FileCreationFailed,
   FileRollbackFailed,
   RepositoryDoesNotExist,
+  FileContainsPlagiarism,
 };

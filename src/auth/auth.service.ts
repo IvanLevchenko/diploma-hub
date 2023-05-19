@@ -79,8 +79,12 @@ export class AuthService {
 
     const isAuthorized = this.tokenHelper.isTokenValid(
       dtoIn.authorizationHeader,
+      false,
     );
-    const isRefreshToken = this.tokenHelper.isTokenValid(dtoIn.refreshToken);
+    const isRefreshToken = this.tokenHelper.isTokenValid(
+      dtoIn.refreshToken,
+      true,
+    );
 
     if (!isAuthorized && !isRefreshToken) {
       response = {

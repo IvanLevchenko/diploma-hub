@@ -10,6 +10,7 @@ const Constants = Object.freeze({
 
   scriptNames: {
     pdfPageToPngScript: "pdf-page-to-png-script",
+    plagiarismCheckerScript: "main",
   },
 });
 
