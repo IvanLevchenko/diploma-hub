@@ -20,7 +20,6 @@ class RunScriptHelper {
     );
     const process = spawn("python", [scriptLocation, pdfPath]);
 
-    console.log(scriptLocation, pdfPath, "<-----");
     process.stdout.on("data", (data: Buffer) => {
       if (data) {
         const fileDir = path.join(__dirname, "../../../uploads/first-pages");

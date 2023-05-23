@@ -91,7 +91,7 @@ export class FileService {
       await this.fileRepository.delete({ id: createdFile.id });
 
       throw new CreateExceptions.FileContainsPlagiarism({
-        unique: plagiarismResult.percentOfUniqueness,
+        percent: plagiarismResult.percentOfUniqueness,
       });
     }
 
@@ -102,12 +102,14 @@ export class FileService {
 
       await this.fileRepository.delete({ id: createdFile.id });
 
-      throw new CreateExceptions.FileContainsPlagiarism({
-        unique: plagiarismResult.percentOfUniqueness,
-      });
+      throw new CreateExceptions.FileContainsPlagiarism({});
     }
 
-    return createdFile;
+    return {
+      ...createdFile,
+      passed: plagiarismResult.passed,
+      percent: plagiarismResult.percentOfUniqueness,
+    };
   }
 
   public async list(dtoIn: FileListDto = {}): Promise<File[]> {
@@ -172,6 +174,7 @@ export class FileService {
 
     this.deleteFileUploads(file);
 
+    await this.deleteFileFromRepository(file.id, file.repositoryId);
     await this.fileRepository.delete({ id: dtoIn.id });
   }
 
@@ -184,6 +187,20 @@ export class FileService {
       .update(Repository)
       .set({
         filesIdList: () => `array_append("filesIdList", '${fileId}')`,
+      })
+      .where("id = :id", { id: repositoryId })
+      .execute();
+  }
+
+  private async deleteFileFromRepository(
+    fileId: string,
+    repositoryId: string,
+  ): Promise<void> {
+    await this.repositoryRepository
+      .createQueryBuilder()
+      .update(Repository)
+      .set({
+        filesIdList: () => `array_remove("filesIdList", '${fileId}')`,
       })
       .where("id = :id", { id: repositoryId })
       .execute();
