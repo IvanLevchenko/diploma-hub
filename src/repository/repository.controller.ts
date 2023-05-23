@@ -22,7 +22,7 @@ import { RepositoryWithAuthor } from "./types/repository-with-author";
 
 import { AuthRolesGuard } from "../auth/auth-roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
-import UserRoles from "../common/enums/user-roles.enum";
+import { UserRoles } from "../common/enums/user-roles.enum";
 
 @Controller("repository")
 export class RepositoryController {

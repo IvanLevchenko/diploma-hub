@@ -15,7 +15,7 @@ import { User } from "./user.entity";
 import { UserCastToRoleDto, UserGetDto } from "./dto";
 
 import { Roles } from "../common/decorators/roles.decorator";
-import UserRoles from "../common/enums/user-roles.enum";
+import { UserRoles } from "../common/enums/user-roles.enum";
 import { AuthRolesGuard } from "../auth/auth-roles.guard";
 
 @Controller("user")

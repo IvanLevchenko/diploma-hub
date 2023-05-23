@@ -1,6 +1,6 @@
-import { IsString, IsUUID, IsIn } from "class-validator";
+import { IsIn, IsString, IsUUID } from "class-validator";
 
-import UserRoles from "../../common/enums/user-roles.enum";
+import { UserRoles } from "../../common/enums/user-roles.enum";
 
 export abstract class UserCastToRoleDto {
   @IsUUID()

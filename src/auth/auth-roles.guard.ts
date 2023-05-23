@@ -8,7 +8,7 @@ import { rolesKey } from "../common/decorators/roles.decorator";
 import { AuthService } from "./auth.service";
 import { AuthorizationResult } from "../common/types/authorization-result";
 import { TokenPayload } from "../common/interfaces/token-payload";
-import UserRoles from "../common/enums/user-roles.enum";
+import { UserRoles } from "../common/enums/user-roles.enum";
 
 import Exceptions from "./exceptions/auth.exceptions";
 import Constants from "../constants";
@@ -48,7 +48,11 @@ export class AuthRolesGuard {
         verifiedResult.updatedTokens.refreshToken,
         Constants.refreshTokenOptions,
       );
-      request.headers.authorization = `Bearer ${verifiedResult.updatedTokens.token}`;
+
+      // response.setHeader(
+      //   "Authorization",
+      //   `Bearer ${verifiedResult.updatedTokens.token}`,
+      // );
     }
 
     if (mustHaveRoles.includes(UserRoles.ALL)) {

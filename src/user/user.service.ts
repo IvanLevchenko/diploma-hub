@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
 import { User } from "./user.entity";
-import UserRoles from "../common/enums/user-roles.enum";
+import { UserRoles } from "../common/enums/user-roles.enum";
 import {
   UserCastToRoleDto,
   UserCreateDto,
