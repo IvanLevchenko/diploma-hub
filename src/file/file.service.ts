@@ -80,10 +80,16 @@ export class FileService {
       path.join(process.cwd(), file.filepath),
     );
 
-    const plagiarismResult = await runScriptHelper.plagiarismCheck(
-      filepath,
-      filesPaths,
-    );
+    let plagiarismResult;
+
+    try {
+      plagiarismResult = await runScriptHelper.plagiarismCheck(
+        filepath,
+        filesPaths,
+      );
+    } catch (e) {
+      throw new CreateExceptions.FileCreationFailed({});
+    }
 
     if (!plagiarismResult.passed) {
       this.deleteFileUploads(createdFile);

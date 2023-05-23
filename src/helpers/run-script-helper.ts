@@ -21,25 +21,28 @@ class RunScriptHelper {
     const process = spawn("python", [scriptLocation, pdfPath]);
 
     process.stdout.on("data", (data: Buffer) => {
-      if (data) {
-        const fileDir = path.join(__dirname, "../../../uploads/first-pages");
-        if (!fs.existsSync(fileDir)) {
-          fs.mkdir(fileDir, (e) => {
-            throw new HttpException(
-              "Failed to create tmp dir. Detail: " + e,
-              400,
-            );
-          });
-        }
-        fs.writeFile(path.join(fileDir, `page-${id}`), data, (e) => {
+      const fileDir = path.join(__dirname, "../../../uploads/first-pages");
+      if (!fs.existsSync(fileDir)) {
+        fs.mkdir(fileDir, (e) => {
+          throw new HttpException(
+            "Failed to create tmp dir. Detail: " + e,
+            400,
+          );
+        });
+      }
+      fs.appendFile(
+        path.join(fileDir, `page-${id}`),
+        data,
+        { encoding: "base64" },
+        (e) => {
           if (e) {
             throw new HttpException(
               "Failed to write file of first page. Detail: " + e,
               400,
             );
           }
-        });
-      }
+        },
+      );
     });
   }
 
@@ -71,10 +74,10 @@ class RunScriptHelper {
 
       childProcess.stdout.on("data", (data: Buffer) => {
         const str = data.toString();
-        const payload = str.split(";");
+        const payload = str.trim().split(";");
 
         result = {
-          passed: payload.includes("true"),
+          passed: payload[0].includes("true"),
           percentOfUniqueness: 100 - Number(payload[1]),
         };
 
