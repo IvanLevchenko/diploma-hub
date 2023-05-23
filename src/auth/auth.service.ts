@@ -16,6 +16,7 @@ import { IsAuthorized } from "./interfaces/is-authorized";
 
 import RegisterExceptions from "./exceptions/register.exceptions";
 import LoginExceptions from "./exceptions/login.exceptions";
+import IsAuthorizedExceptions from "./exceptions/is-authorized.exceptions";
 
 @Injectable()
 export class AuthService {
@@ -75,6 +76,13 @@ export class AuthService {
   }
 
   public async isAuthorized(dtoIn: IsAuthorizedDto): Promise<IsAuthorized> {
+    const token = dtoIn.authorizationHeader.split(" ")[1];
+    const refreshToken = dtoIn.refreshToken;
+
+    if (!token || !refreshToken) {
+      throw new IsAuthorizedExceptions.UserIsNotAuthorized({});
+    }
+
     let response: IsAuthorized;
 
     const isAuthorized = this.tokenHelper.isTokenValid(
@@ -90,7 +98,7 @@ export class AuthService {
       response = {
         isAuthorized: false,
       };
-    } else {
+    } else if (!isAuthorized && isRefreshToken) {
       const tokenPayload = this.tokenHelper.decodeToken(
         dtoIn.authorizationHeader,
       );
@@ -101,7 +109,13 @@ export class AuthService {
 
       response = {
         isAuthorized: true,
+        tokenPayload: this.tokenHelper.decodeToken(tokens.token),
         tokens,
+      };
+    } else {
+      response = {
+        isAuthorized: true,
+        tokenPayload: this.tokenHelper.decodeToken(dtoIn.authorizationHeader),
       };
     }
 
