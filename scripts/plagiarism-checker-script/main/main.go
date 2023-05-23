@@ -14,10 +14,10 @@ var wg sync.WaitGroup
 func main() {
 	pivotFile := os.Args[1] // Getting file, that will be checked
 	filesForCheck := os.Args[2:] // Getting existing files
-	passed := false
+	var passed bool
 
 	if len(filesForCheck) == 1 && filesForCheck[0] == pivotFile { // If there is only pivot itself then just return "true"
-		fmt.Printf("%v;", !passed)
+		fmt.Printf("%t;%d", true, 0)
 		return
 	}
 	
@@ -25,7 +25,7 @@ func main() {
 
 	pivotFileContent, err := pdf.ReadPdf(pivotFile) // Content from pivot file
 	pivotFileBySentences := strings.Split(pivotFileContent, splitBySentences) // Splittet by sentences
-	
+
 	controlChannel := make(chan int) // If this channel closed, then we are stopping our program and returning result
 	results := make(chan int, 4) // This channel will contain all calculated results for files
 	done := false // If "done" == true, then we will break the loop
@@ -55,12 +55,10 @@ func main() {
 		go verify(controlChannel, results, pivotFileBySentences, currentFileBySentences, &done)
 	}
 	
-	go func() {
-		wg.Wait()
-	}()
+	wg.Wait()
 
 	resultLen := len(results)
-	percent := 0
+	var percent int
 
 	for i := 0; i < resultLen; i++ {
 		if percent > 20 {
@@ -68,14 +66,12 @@ func main() {
 		}
 
 		percent = <- results
-		
+
 		if percent > 20 {
 			passed = false
+		} else {
+			passed = true // If percent of similar sentences is less than 20, we are considering that file "passed" 
 		}
-
-		if percent < 20 { // If percent of similar sentences is less than 20, we are considering that file "passed" 
-			passed = true
-		} 
 	}
 	
 	fmt.Printf("%t;%d", passed, int(math.Round(float64(percent)))) // Printing result to receive it from stdout in NodeJs
