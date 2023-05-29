@@ -40,7 +40,7 @@ export class RepositoryService {
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
-  async create(
+  public async create(
     dtoIn: RepositoryCreateDto,
     authorizationHeader: string,
   ): Promise<Repository> {
@@ -51,7 +51,7 @@ export class RepositoryService {
     });
   }
 
-  async get(dtoIn: RepositoryGetDto): Promise<RepositoryWithAuthor> {
+  public async get(dtoIn: RepositoryGetDto): Promise<RepositoryWithAuthor> {
     const repository = (await this.repositoryRepository.findOne({
       where: { id: dtoIn.id },
       relations: ["author", "filesList"],
@@ -67,7 +67,7 @@ export class RepositoryService {
     return repository;
   }
 
-  async list(dtoIn: RepositoryListDto): Promise<RepositoryWithAuthor[]> {
+  public async list(dtoIn: RepositoryListDto): Promise<RepositoryWithAuthor[]> {
     const filter = this.getFilterList(dtoIn);
 
     const repositories = (await this.repositoryRepository.find({
@@ -84,7 +84,7 @@ export class RepositoryService {
     });
   }
 
-  async delete(dtoIn: RepositoryDeleteDto): Promise<void> {
+  public async delete(dtoIn: RepositoryDeleteDto): Promise<void> {
     await this.repositoryRepository.delete({ id: dtoIn.id });
   }
 
