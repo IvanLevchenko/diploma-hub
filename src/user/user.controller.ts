@@ -26,8 +26,16 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Roles(UserRoles.ADMIN)
   @UseGuards(AuthRolesGuard)
-  private get(@Query() dtoIn: UserGetDto): Promise<User | HttpException> {
+  private get(@Query() dtoIn: UserGetDto): Promise<User> {
     return this.userService.get(dtoIn);
+  }
+
+  @Get("list")
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRoles.ALL)
+  @UseGuards(AuthRolesGuard)
+  private list(): Promise<User[]> {
+    return this.userService.list();
   }
 
   @Patch("castToRole")

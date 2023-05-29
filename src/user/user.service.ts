@@ -21,14 +21,14 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async create(dtoIn: UserCreateDto): Promise<User> {
+  public async create(dtoIn: UserCreateDto): Promise<User> {
     return this.userRepository.save({
       ...dtoIn,
       role: UserRoles.STUDENT,
     });
   }
 
-  async update(dtoIn: UserUpdateDto) {
+  public async update(dtoIn: UserUpdateDto) {
     const user = await this.userRepository.findOneBy({ id: dtoIn.id });
 
     if (!user) {
@@ -43,7 +43,7 @@ export class UserService {
     };
   }
 
-  async get(dtoIn: UserGetDto): Promise<User> {
+  public async get(dtoIn: UserGetDto): Promise<User> {
     const user = await this.userRepository.findOneBy({ id: dtoIn.id });
 
     if (!user) {
@@ -53,11 +53,11 @@ export class UserService {
     return user;
   }
 
-  async getByEmail(dtoIn: UserGetByEmailDto): Promise<User | null> {
+  public async getByEmail(dtoIn: UserGetByEmailDto): Promise<User | null> {
     return await this.userRepository.findOneBy({ email: dtoIn.email });
   }
 
-  async castToRole(dtoIn: UserCastToRoleDto): Promise<User> {
+  public async castToRole(dtoIn: UserCastToRoleDto): Promise<User> {
     const user = await this.userRepository.findOneBy({ id: dtoIn.id });
 
     if (!user) {
@@ -65,5 +65,9 @@ export class UserService {
     }
 
     return this.userRepository.save({ ...user, role: dtoIn.role });
+  }
+
+  public async list(): Promise<User[]> {
+    return await this.userRepository.find({ relations: ["group"] });
   }
 }
