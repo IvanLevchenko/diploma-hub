@@ -49,10 +49,10 @@ export class AuthRolesGuard {
         Constants.refreshTokenOptions,
       );
 
-      // response.setHeader(
-      //   "Authorization",
-      //   `Bearer ${verifiedResult.updatedTokens.token}`,
-      // );
+      response.setHeader(
+        "Authorization",
+        `Bearer ${verifiedResult.updatedTokens.token}`,
+      );
     }
 
     if (mustHaveRoles.includes(UserRoles.ALL)) {
@@ -71,16 +71,21 @@ export class AuthRolesGuard {
   }> {
     let parsedToken;
     let updatedTokens;
+
     try {
       parsedToken = this.jwtService.verify(token, {
         secret: process.env.SECRET_KEY,
       });
     } catch (e) {
       try {
-        parsedToken = this.jwtService.verify(refreshToken, {
+        const verifiedRefreshToken = this.jwtService.verify(refreshToken, {
           secret: process.env.SECRET_REFRESH_KEY,
         });
-        updatedTokens = await this.refreshTokens(parsedToken.id, refreshToken);
+        updatedTokens = await this.refreshTokens(
+          verifiedRefreshToken.id,
+          refreshToken,
+        );
+        parsedToken = this.jwtService.decode(updatedTokens.token);
       } catch (e) {
         throw new Exceptions.UnauthorizedRequest({});
       }

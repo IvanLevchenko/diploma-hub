@@ -43,7 +43,14 @@ export class AuthService {
       throw new LoginExceptions.UserAuthorizationFailed({});
     }
 
-    return this.tokenHelper.generateTokens(user);
+    const tokens = await this.tokenHelper.generateTokens(user);
+
+    await this.userService.update({
+      id: user.id,
+      refreshToken: tokens.refreshToken,
+    });
+
+    return tokens;
   }
 
   public async register(dtoIn: RegisterDto): Promise<AuthorizationResult> {
@@ -56,12 +63,16 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(dtoIn.password, 6);
-    const user = await this.userService.create({
+
+    await this.userService.create({
       ...dtoIn,
       password: hashedPassword,
     });
 
-    return this.tokenHelper.generateTokens(user);
+    return await this.login({
+      email: dtoIn.email,
+      password: dtoIn.password,
+    });
   }
 
   public async logout(dtoIn: LogoutServiceDto): Promise<void> {
@@ -93,6 +104,20 @@ export class AuthService {
       dtoIn.refreshToken,
       true,
     );
+
+    if (isAuthorized || isRefreshToken) {
+      const token = isAuthorized
+        ? dtoIn.authorizationHeader
+        : dtoIn.refreshToken;
+      const decodedToken = this.tokenHelper.decodeToken(token);
+      const user = await this.userService.get({ id: decodedToken.id });
+
+      if (user.refreshToken !== dtoIn.refreshToken) {
+        throw new LoginExceptions.UserAuthorizationFailed({
+          refreshToken: dtoIn.refreshToken,
+        });
+      }
+    }
 
     if (!isAuthorized && !isRefreshToken) {
       response = {
