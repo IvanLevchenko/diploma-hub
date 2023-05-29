@@ -6,10 +6,12 @@ import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
 import { FileModule } from "./file/file.module";
 import { RepositoryModule } from "./repository/repository.module";
+import { GroupModule } from "./group/group.module";
 
 import { User } from "./user/user.entity";
 import { Repository } from "./repository/repository.entity";
 import { File } from "./file/file.entity";
+import { Group } from "./group/group.entity";
 
 @Module({
   imports: [
@@ -21,13 +23,14 @@ import { File } from "./file/file.entity";
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE,
-      entities: [User, File, Repository],
+      entities: [User, File, Repository, Group],
       synchronize: true,
     }),
     UserModule,
     AuthModule,
     FileModule,
     RepositoryModule,
+    GroupModule,
   ],
 })
 export class AppModule {}

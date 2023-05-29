@@ -1,7 +1,10 @@
 const apiPrefix = "api/v1";
+const uuidPattern =
+  /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
 const Constants = Object.freeze({
   apiPrefix: apiPrefix,
+  uuidPattern: uuidPattern,
 
   refreshTokenOptions: {
     httpOnly: true,
