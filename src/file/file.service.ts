@@ -11,7 +11,13 @@ import { UserService } from "../user/user.service";
 import { File } from "./file.entity";
 import TokenHelper from "../helpers/token-helper";
 import RunScriptHelper from "../helpers/run-script-helper";
-import { FileCreateDto, FileDeleteDto, FileGetDto, FileListDto } from "./dto";
+import {
+  FileCreateDto,
+  FileDeleteDto,
+  FileGetDto,
+  FileListDto,
+  FileUpdateDto,
+} from "./dto";
 
 import CreateExceptions from "./exceptions/create.exceptions";
 import GetExceptions from "./exceptions/get.exceptions";
@@ -182,6 +188,10 @@ export class FileService {
 
     await this.deleteFileFromRepository(file.id, file.repositoryId);
     await this.fileRepository.delete({ id: dtoIn.id });
+  }
+
+  public async update(dtoIn: FileUpdateDto): Promise<File> {
+    return await this.fileRepository.save(dtoIn);
   }
 
   private async addFileToRepository(

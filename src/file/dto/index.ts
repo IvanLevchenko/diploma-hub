@@ -3,3 +3,4 @@ export { FileListDto } from "./file-list.dto";
 export { FileGetDto } from "./file-get.dto";
 export { FileDeleteDto } from "./file-delete.dto";
 export { FileCreateDtoOut } from "./file-create.dto";
+export { FileUpdateDto } from "./file-update.dto";

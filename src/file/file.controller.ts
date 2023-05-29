@@ -7,6 +7,7 @@ import {
   Headers,
   MaxFileSizeValidator,
   ParseFilePipe,
+  Patch,
   Post,
   Query,
   Res,
@@ -18,7 +19,13 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 
-import { FileCreateDto, FileDeleteDto, FileGetDto, FileListDto } from "./dto";
+import {
+  FileCreateDto,
+  FileDeleteDto,
+  FileGetDto,
+  FileListDto,
+  FileUpdateDto,
+} from "./dto";
 import { FileService } from "./file.service";
 import { File } from "./file.entity";
 
@@ -77,5 +84,12 @@ export class FileController {
   @Roles(UserRoles.ALL)
   private async delete(@Body() dtoIn: FileDeleteDto): Promise<void> {
     return this.fileService.delete(dtoIn);
+  }
+
+  @Patch("update")
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserRoles.ALL)
+  private async update(@Body() dtoIn: FileUpdateDto): Promise<File> {
+    return this.fileService.update(dtoIn);
   }
 }
