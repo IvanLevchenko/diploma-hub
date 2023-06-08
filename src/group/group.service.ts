@@ -1,37 +1,55 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { JwtService } from "@nestjs/jwt";
 
 import { User } from "../user/user.entity";
 import { Group } from "./group.entity";
 import {
   GroupAddUsersDto,
   GroupCreateDto,
+  GroupDeleteDto,
   GroupGetDto,
   GroupListDto,
   GroupRemoveUsersDto,
+  GroupUpdateDto,
 } from "./dto";
+import TokenHelper from "../helpers/token-helper";
+import { UserService } from "../user/user.service";
 
 import CreateExceptions from "./exceptions/create.exceptions";
 import GetExceptions from "./exceptions/get.exceptions";
 import AddUsersExceptions from "./exceptions/add-users.exceptions";
 import RemoveUsersExceptions from "./exceptions/remove-users.exceptions";
+import DeleteExceptions from "./exceptions/delete.exceptions";
+import UpdateExceptions from "./exceptions/update.exceptions";
 
 @Injectable()
 export class GroupService {
+  private tokenHelper = new TokenHelper(this.jwsService, this.userService);
   constructor(
     @InjectRepository(Group) private groupRepository: Repository<Group>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private jwsService: JwtService,
+    private userService: UserService,
   ) {}
 
-  public async create(dtoIn: GroupCreateDto): Promise<Group> {
+  public async create(
+    dtoIn: GroupCreateDto,
+    authHeader: string,
+  ): Promise<Group> {
     const group = await this.groupRepository.findOneBy({ name: dtoIn.name });
 
     if (group) {
       throw new CreateExceptions.GroupIsAlreadyExists({ name: dtoIn.name });
     }
 
-    return await this.groupRepository.save(dtoIn);
+    const sessionPayload = this.tokenHelper.decodeToken(authHeader);
+
+    return await this.groupRepository.save({
+      ...dtoIn,
+      authorId: sessionPayload.id,
+    });
   }
 
   public async list(dtoIn: GroupListDto): Promise<Group[]> {
@@ -89,6 +107,26 @@ export class GroupService {
     }
 
     return this.manageGroupUsers(dtoIn.userIdList, dtoIn.groupId, "remove");
+  }
+
+  public async delete(dtoIn: GroupDeleteDto): Promise<void> {
+    const group = await this.groupRepository.findOneBy({ id: dtoIn.id });
+
+    if (!group) {
+      throw new DeleteExceptions.GroupDoesNotExist({ id: dtoIn.id });
+    }
+
+    await this.groupRepository.delete({ id: dtoIn.id });
+  }
+
+  public async update(dtoIn: GroupUpdateDto): Promise<Group> {
+    const group = await this.groupRepository.findOneBy({ id: dtoIn.id });
+
+    if (!group) {
+      throw new UpdateExceptions.GroupDoesNotExist({ id: dtoIn.id });
+    }
+
+    return await this.groupRepository.save(dtoIn);
   }
 
   private async manageGroupUsers(

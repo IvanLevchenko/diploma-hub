@@ -20,6 +20,9 @@ export class Group {
   @Column("text", { array: true, default: () => "'{}'" })
   userIdList: string[];
 
+  @Column("uuid")
+  authorId: string;
+
   @OneToMany(() => User, (user) => user.group)
   @JoinColumn()
   userList: PublicUser[];

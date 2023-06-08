@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Headers,
   Patch,
   Post,
   Query,
@@ -13,9 +15,11 @@ import { Group } from "./group.entity";
 import {
   GroupAddUsersDto,
   GroupCreateDto,
+  GroupDeleteDto,
   GroupGetDto,
   GroupListDto,
   GroupRemoveUsersDto,
+  GroupUpdateDto,
 } from "./dto";
 import { Roles } from "../common/decorators/roles.decorator";
 import { UserRoles } from "../common/enums/user-roles.enum";
@@ -28,8 +32,11 @@ export class GroupController {
   @Post("create")
   @Roles(UserRoles.ADMIN)
   @UseGuards(AuthRolesGuard)
-  private async create(@Body() dtoIn: GroupCreateDto): Promise<Group> {
-    return this.groupService.create(dtoIn);
+  private async create(
+    @Body() dtoIn: GroupCreateDto,
+    @Headers() headers,
+  ): Promise<Group> {
+    return this.groupService.create(dtoIn, headers.authorization);
   }
 
   @Get("list")
@@ -60,5 +67,19 @@ export class GroupController {
     @Body() dtoIn: GroupRemoveUsersDto,
   ): Promise<Group> {
     return this.groupService.removeUsers(dtoIn);
+  }
+
+  @Delete("delete")
+  @Roles(UserRoles.ADMIN, UserRoles.TEACHER)
+  @UseGuards(AuthRolesGuard)
+  private async delete(@Body() dtoIn: GroupDeleteDto): Promise<void> {
+    return this.groupService.delete(dtoIn);
+  }
+
+  @Patch("update")
+  @Roles(UserRoles.ADMIN, UserRoles.TEACHER)
+  @UseGuards(AuthRolesGuard)
+  private async update(@Body() dtoIn: GroupUpdateDto): Promise<Group> {
+    return this.groupService.update(dtoIn);
   }
 }
