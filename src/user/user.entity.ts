@@ -35,7 +35,10 @@ export class User {
   @Column("text", { nullable: true })
   groupId: string | null;
 
-  @ManyToOne(() => Group, (group) => group, { eager: true })
+  @ManyToOne(() => Group, (group) => group, {
+    eager: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn()
   group: Group;
 }

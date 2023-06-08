@@ -22,9 +22,11 @@ export class UserService {
   ) {}
 
   public async create(dtoIn: UserCreateDto): Promise<User> {
+    const userCount = await this.userRepository.count();
+
     return this.userRepository.save({
       ...dtoIn,
-      role: UserRoles.STUDENT,
+      role: userCount === 0 ? UserRoles.ADMIN : UserRoles.STUDENT,
     });
   }
 

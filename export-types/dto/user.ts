@@ -1,1 +1,1 @@
-export { UserListDto } from "../../src/user/dto/index";
+export { UserListDto, UserCastToRoleDto } from "../../src/user/dto/index";

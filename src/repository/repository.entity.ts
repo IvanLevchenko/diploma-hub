@@ -32,7 +32,7 @@ export class Repository {
   authorId: string;
 
   @CreateDateColumn()
-  created: Date;
+  created: Date | string;
 
   @ManyToOne(() => User, (user) => user, { onDelete: "CASCADE" })
   @JoinColumn()

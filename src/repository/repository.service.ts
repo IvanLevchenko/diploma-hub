@@ -69,7 +69,6 @@ export class RepositoryService {
 
   public async list(dtoIn: RepositoryListDto): Promise<RepositoryWithAuthor[]> {
     const filter = this.getFilterList(dtoIn);
-
     const repositories = (await this.repositoryRepository.find({
       skip: dtoIn.pageInfo?.page,
       take: dtoIn.pageInfo?.pageSize,
@@ -88,10 +87,12 @@ export class RepositoryService {
     await this.repositoryRepository.delete({ id: dtoIn.id });
   }
 
-  private getFilterList(dtoIn): FindOptionsWhere<Repository> {
+  private getFilterList(
+    dtoIn: RepositoryListDto,
+  ): FindOptionsWhere<Repository> {
     const filter: FindOptionsWhere<Repository> = {};
     if (dtoIn.dateFrom && dtoIn.dateTo) {
-      filter.created = Between(dtoIn.dateFrom, dtoIn.dateFrom);
+      filter.created = Between(dtoIn.dateFrom, dtoIn.dateTo);
     } else if (dtoIn.dateFrom) {
       filter.created = MoreThanOrEqual(dtoIn.dateFrom);
     } else if (dtoIn.dateTo) {
